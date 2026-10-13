@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 1 · Line Graphs: iframe-коди для Kwiga</title>
+<link rel="stylesheet" href="shared/core.css">
+<style>
+ .code{background:#22271E;color:#E9F2E4;border-radius:10px;padding:12px 14px;font-family:Consolas,monospace;font-size:12.5px;white-space:pre-wrap;word-break:break-all;margin:8px 0}
+ .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+ input.url{flex:1;min-width:260px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit}
+ .st{font-size:12px;font-weight:700;border-radius:12px;padding:2px 10px}
+ .st.ready{background:var(--green-soft);color:var(--green)} .st.soon{background:var(--orange-soft);color:#9A5A00}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Module 1 · Line Graphs</h1>
+  <p class="sub">Це службова сторінка для тебе, учням вона не потрібна. Тут готові iframe-коди для кожного уроку Kwiga.</p>
+
+  <div class="card">
+    <h2>1. Адреса сайту на Vercel</h2>
+    <div class="row"><input class="url" id="base" value="https://ielts-line-graph.vercel.app"><button class="btn btn-primary" onclick="render()">Оновити коди</button></div>
+    <p class="small" style="margin-top:8px">Без слеша в кінці. Усі коди нижче підставляють цю адресу автоматично.</p>
+  </div>
+
+  <div class="card">
+    <h2>2. Як вставляти в Kwiga</h2>
+    <p>У кожному уроці додай блок «HTML-код» (або iframe) і встав код з урока нижче. Скрипт у коді підганяє висоту, тому подвійного скролу не буде. Якщо Kwiga вирізає скрипт, видали його, а в iframe лиши <code>height="1200"</code>.</p>
+  </div>
+
+  <div id="list"></div>
+</div>
+<script>
+var LESSONS = [
+  {id:'03', file:'lessons/03-introduction.html', title:'Practice · Introduction', status:'ready'},
+  {id:'04', file:'lessons/04-overview.html',     title:'Practice · Overview',     status:'ready'},
+  {id:'05', file:'lessons/05-body-1.html',       title:'Practice · Main body 1',  status:'soon'},
+  {id:'06', file:'lessons/06-body-2.html',       title:'Practice · Main body 2',  status:'soon'}
+];
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function render(){
+  var base=document.getElementById('base').value.replace(/\/+$/,'');
+  document.getElementById('list').innerHTML = LESSONS.map(function(l){
+    var url=base+'/'+l.file, fid='ielts-'+l.id;
+    var code='<iframe id="'+fid+'" src="'+url+'" width="100%" height="1200" style="border:0;border-radius:12px;" loading="lazy"></iframe>\n'+
+      '<script>window.addEventListener("message",function(e){var f=document.getElementById("'+fid+'");if(f&&e.source===f.contentWindow&&e.data&&e.data.type==="ielts-resize"){f.style.height=e.data.height+"px";}});<\/script>';
+    return '<div class="card"><span class="st '+l.status+'">'+(l.status==='ready'?'готово':'скоро')+'</span><h2 style="margin-top:8px">'+l.title+'</h2>'+
+      '<p class="small">'+url+'</p>'+
+      (l.status==='ready'?'<div class="code" id="c'+l.id+'">'+esc(code)+'</div><button class="btn btn-primary" onclick="copyCode(\''+l.id+'\')">Скопіювати код</button><a class="btn btn-ghost" style="text-decoration:none" target="_blank" href="'+l.file+'">Відкрити урок</a>':'<p class="small">Файл з’явиться в наступному оновленні.</p>')+'</div>';
+  }).join('');
+}
+function copyCode(id){var t=document.getElementById('c'+id).textContent;
+  if(navigator.clipboard)navigator.clipboard.writeText(t);else{var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}
+  alert('Скопійовано. Встав у блок HTML-коду в Kwiga.');}
+render();
+</script>
+</body>
+</html>
