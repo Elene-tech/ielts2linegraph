@@ -9,7 +9,7 @@
   S.done = S.done || {}; S.vals = S.vals || {};
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
-  var INTER = ['gap', 'choose', 'pick', 'rewrite', 'write', 'build'];
+  var INTER = ['gap', 'choose', 'pick', 'rewrite', 'write', 'build', 'fullwrite'];
   var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); };
   var norm = function (s) { return String(s).toLowerCase().replace(/[.,!?;:"“”]/g, '').replace(/\s+/g, ' ').trim(); };
   var words = function (s) { s = s.trim(); return s ? s.split(/\s+/).length : 0; };
@@ -62,11 +62,11 @@
     g.series.forEach(function (sr) { t += '<tr><th>' + esc(sr.name) + '</th>' + sr.values.map(function (v) { return '<td>' + v + '</td>'; }).join('') + '</tr>'; });
     return t + '</table>';
   }
-  function miniGraph(gid) { var g = G[gid]; return '<details class="gm"><summary>📈 Показати графік</summary>' + chartSVG(g) + '</details>'; }
+  function miniGraph(gid, open) { var g = G[gid]; return '<details class="gm"' + (open ? ' open' : '') + '><summary>📈 Показати графік</summary>' + chartSVG(g) + '</details>'; }
 
   /* ---------- рендер блоків ---------- */
   function card(b, inner) {
-    var gm = (b._r != null && b.graph !== false && INTER.indexOf(b.type) >= 0) ? miniGraph(L.rounds[b._r].graph) : '';
+    var gm = (b._r != null && b.graph !== false && INTER.indexOf(b.type) >= 0) ? miniGraph(L.rounds[b._r].graph, b.type === 'fullwrite') : '';
     return '<div class="card' + (S.done[b.id] ? ' is-done' : '') + '" id="' + b.id + '">' +
       (b.tag ? '<span class="step-tag tag-' + (b.tagc || 'green') + '">' + b.tag + '</span>' : '') +
       (b.title ? '<h2>' + b.title + '</h2>' : '') + (b.intro ? '<p>' + b.intro + '</p>' : '') + gm + inner + '</div>';
@@ -103,7 +103,7 @@
     return card(b, '<p class="small">Клікни на варіант: побачиш, чому він правильний або ні.</p>' + h + '<div class="fb" id="fb-' + b.id + '"></div>');
   };
   R.pick = function (b) {
-    var h = '<p class="small">Познач <b>' + b.need + '</b> твердження, які мають увійти в Overview, і натисни «Перевірити».</p>' + shuffle(b.opts.map(function (o, i) { return i; })).map(function (oi) {
+    var h = '<p class="small">' + (b.prompt || ('Познач <b>' + b.need + '</b> твердження, які мають увійти в Overview, і натисни «Перевірити».')) + '</p>' + shuffle(b.opts.map(function (o, i) { return i; })).map(function (oi) {
       return '<div class="opt" data-act="pick" data-b="' + b.id + '" data-o="' + oi + '" id="po-' + b.id + '-' + oi + '"><div>' + b.opts[oi][0] + '<div class="why">' + (b.opts[oi][1] ? '✓ ' : '✗ ') + b.opts[oi][2] + '</div></div></div>';
     }).join('');
     return card(b, h + '<button class="btn btn-primary" data-act="pick-check" data-b="' + b.id + '">Перевірити</button><div class="fb" id="fb-' + b.id + '"></div>');
@@ -119,9 +119,32 @@
   }
   R.rewrite = function (b) { return textBlock(b, 'rewrite'); };
   R.write = function (b) { return textBlock(b, 'write'); };
+
+  function wordChips(ws) { return '<div class="bank">' + ws.map(function (w) { return '<span>' + w[0] + (w[1] ? ' <small>— ' + w[1] + '</small>' : '') + '</span>'; }).join('') + '</div>'; }
+  R.logic = function (b) {
+    var h = b.steps.map(function (st, i) {
+      return '<div class="logic-step"><div class="ln">' + (i + 1) + '</div><div><b>' + st.title + '</b>' + (st.ua ? '<p>' + st.ua + '</p>' : '') + (st.frame ? '<p class="frame">' + st.frame + '</p>' : '') + '</div></div>';
+    }).join('');
+    var inner = (b.lead ? '<p>' + b.lead + '</p>' : '') + h + (b.words ? '<p class="small" style="margin-top:12px"><b>Слова, які можуть знадобитись:</b></p>' + wordChips(b.words) : '');
+    if (b.collapsed) inner = '<details class="d"><summary>Показати план абзацу</summary><div style="margin-top:10px">' + inner + '</div></details>';
+    return card(b, inner);
+  };
+  var TM = {};
+  R.fullwrite = function (b) {
+    var parts = b.parts.map(function (p) {
+      var hint = (b.hints !== false && (p.ua || p.starter || p.words)) ? '<details class="d" style="margin:6px 0"><summary>💡 Підказка</summary><p class="small" style="margin-top:6px">' + (p.ua ? p.ua + '<br>' : '') + (p.starter ? 'Початок: <i>' + p.starter + '</i><br>' : '') + (p.words ? 'Слова: ' + p.words : '') + '</p></details>' : '';
+      return '<div class="fw-part"><h3>' + p.label + '</h3>' + hint + '<textarea data-fw="' + b.id + ':' + p.key + '"' + (p.nocount ? ' data-nc="1"' : '') + ' rows="' + (p.rows || 3) + '" placeholder="' + esc(p.ph || '') + '">' + esc(S.vals[b.id + ':' + p.key] || '') + '</textarea><div class="wc" id="fwc-' + b.id + '-' + p.key + '">0 слів</div></div>';
+    }).join('');
+    var timer = '<div class="timer"><span class="tm" id="tm-' + b.id + '">' + (b.minutes || 20) + ':00</span><button class="btn btn-ghost" data-act="t-start" data-b="' + b.id + '">▶ Старт</button><button class="btn btn-ghost" data-act="t-pause" data-b="' + b.id + '">⏸ Пауза</button><button class="btn btn-ghost" data-act="t-reset" data-b="' + b.id + '">↺ Скинути</button></div>';
+    var chk = b.check ? '<div class="chk" style="margin-top:14px"><p><b>Самоперевірка:</b></p>' + b.check.map(function (c) { return '<label><input type="checkbox"> ' + c + '</label>'; }).join('') + '</div>' : '';
+    var models = '<div class="model" id="m-' + b.id + '">' + b.models.map(function (m) { return '<p><span class="lab">' + m[0] + ' · ' + words(m[1].replace(/<[^>]+>/g, '')) + ' слів</span><br>' + m[1] + '</p>'; }).join('') + (b.after ? '<p class="small">' + b.after + '</p>' : '') + '</div>';
+    return card(b, '<div class="prompt"><i>' + b.prompt + '</i></div>' + timer + parts + '<div class="fw-total" id="ftot-' + b.id + '">Разом: 0 слів</div>' + chk +
+      '<button class="btn btn-primary" data-act="fw-model" data-b="' + b.id + '">Порівняти з моделлю</button><div class="fb" id="fb-' + b.id + '"></div>' + models);
+  };
   var BS = {};
   R.build = function (b) {
-    var h = b.items.map(function (s, i) {
+    var h = b.items.map(function (s0, i) {
+      var s = Array.isArray(s0) ? s0[0] : s0;
       var w = s.replace(/\.$/, '').split(' '), idx = w.map(function (x, k) { return k;}), ord = shuffle(idx);
       if (ord.join() === idx.join()) ord.reverse();
       BS[b.id + ':' + i] = { words: w, order: ord, out: [], end: /\.$/.test(s) ? '.' : '' };
@@ -153,12 +176,12 @@
   /* ---------- збірка сторінки ---------- */
   var root = $('app');
   var html = '<div class="wrap"><h1>' + L.title + '</h1><p class="sub">' + (L.subtitle || '') + '</p>' +
-    '<div class="progress"><div class="txt"><span>Прогрес: <b id="pdone">0</b> з <b id="ptotal">0</b> вправ</span><span id="pmsg"></span></div><div class="bar"><i id="pbar"></i></div></div>';
+    '<div class="progress"><div class="row"><div class="txt"><span>Прогрес: <b id="pdone">0</b> з <b id="ptotal">0</b> вправ</span><span id="pmsg"></span></div><div class="tbtns">' + (window.renderVocab ? '<button class="tb" data-act="vocab">📚 Словник</button>' : '') + '<button class="tb" data-act="panel">📝 Мої відповіді</button></div></div><div class="bar"><i id="pbar"></i></div></div>';
   (L.intro || []).forEach(function (b) { html += R[b.type](b); });
   html += '<div class="tabs">' + L.rounds.map(function (r, i) { return '<button class="tab' + (i === 0 ? ' on' : '') + '" id="tab' + i + '" data-act="round" data-r="' + i + '">' + r.label + '<small>' + r.sub + '</small></button>'; }).join('') + '</div>';
   L.rounds.forEach(function (r, ri) {
     var g = G[r.graph];
-    html += '<div class="round' + (ri === 0 ? ' on' : '') + '" id="round' + ri + '"><div class="round-head"><h2>' + r.label + ' · ' + g.name + '</h2><p>' + (r.lead || '') + '</p></div>' +
+    html += '<div class="round' + (ri === 0 ? ' on' : '') + '" id="round' + ri + '"><div class="round-head"><h2>' + r.label + ' · ' + g.name + '</h2><p>' + (r.lead || '') + '</p>' + (r.words ? '<p class="small" style="margin-top:8px"><b>💡 Слова для цього раунду</b> (повний словник — кнопка 📚 вгорі):</p>' + wordChips(r.words) : '') + '</div>' +
       '<div class="card"><span class="step-tag tag-blue">Графік</span><h3 style="margin-top:0">' + esc(g.title) + '</h3>' + chartSVG(g) + '<details class="d"><summary>Показати дані у вигляді таблиці</summary><div style="overflow-x:auto;margin-top:8px">' + dataTable(g) + '</div></details></div>';
     r.blocks.forEach(function (b) { html += R[b.type](b); });
     html += '</div>';
@@ -166,9 +189,12 @@
   (L.outro || []).forEach(function (b) { html += R[b.type](b); });
   html += '</div>' +
     '<div id="ans-panel"><div id="ans-box"><h4>Мої відповіді</h4><div class="note">Відповіді зберігаються в цьому браузері. Щоб не втратити — скачай файл.</div>' +
-    '<button class="ans-btn b-txt" data-act="dl">⬇ Скачати (.txt)</button><button class="ans-btn b-copy" data-act="copy">⧉ Скопіювати</button><button class="ans-btn b-pdf" data-act="pdf">🖨 Зберегти як PDF</button><button class="ans-btn b-clear" data-act="clear">Очистити все</button></div>' +
-    '<button class="ans-btn" id="ans-toggle" data-act="panel">📝 Мої відповіді</button></div><div id="flash"></div>';
+    '<button class="ans-btn b-txt" data-act="dl">⬇ Скачати (.txt)</button><button class="ans-btn b-copy" data-act="copy">⧉ Скопіювати</button><button class="ans-btn b-pdf" data-act="pdf">🖨 Зберегти як PDF</button><button class="ans-btn b-clear" data-act="clear">Очистити все</button></div></div>' +
+    (window.renderVocab ? '<div id="vocab-drawer"><div class="vd-head"><b>📚 Словник</b><a href="vocabulary.html?focus=' + (L.vocab || []).join(',') + '" target="_blank" rel="noopener">Відкрити в новій вкладці ↗</a><button class="tb" data-act="vocab">✕</button></div><div id="vocab-body"></div></div>' : '') +
+    '<div id="flash"></div>';
   root.innerHTML = html;
+  if (window.renderVocab) window.renderVocab($('vocab-body'), { focus: L.vocab || [] });
+  document.querySelectorAll('textarea[data-fw]').forEach(function (t) { fwCount(t); });
   ALL.forEach(function (b) { if (b.type === 'build') b.items.forEach(function (_, i) { renderBuild(b, i); }); });
   document.querySelectorAll('textarea[data-ta]').forEach(function (t) { $('wc-' + t.dataset.ta).textContent = words(t.value) + ' слів'; });
   updateProgress();
@@ -236,6 +262,12 @@
       case 'b-del': var st2 = BS[b.id + ':' + el.dataset.i]; st2.out = st2.out.filter(function (x) { return x !== +el.dataset.w; }); $('bo-' + b.id + '-' + el.dataset.i).className = 'build-out'; renderBuild(b, +el.dataset.i); break;
       case 'b-reset': BS[b.id + ':' + el.dataset.i].out = []; $('bo-' + b.id + '-' + el.dataset.i).className = 'build-out'; $('bf-' + b.id + '-' + el.dataset.i).textContent = ''; renderBuild(b, +el.dataset.i); break;
       case 'b-check': buildCheck(b, +el.dataset.i); break;
+      case 'b-accept': var st3 = BS[b.id + ':' + el.dataset.i]; buildOk(b, +el.dataset.i, st3.out.map(function (k) { return st3.words[k]; }).join(' ') + st3.end); break;
+      case 'vocab': $('vocab-drawer').classList.toggle('open'); break;
+      case 't-start': tStart(b); break;
+      case 't-pause': tPause(b); break;
+      case 't-reset': tReset(b); break;
+      case 'fw-model': fwModel(b); break;
       case 'panel': var box = $('ans-box'); box.style.display = box.style.display === 'block' ? 'none' : 'block'; break;
       case 'dl': download(); break;
       case 'copy': copyAns(); break;
@@ -243,16 +275,46 @@
       case 'clear': if (confirm('Очистити всі збережені відповіді та прогрес цього уроку?')) { S = { done: {}, vals: {} }; save(); location.reload(); } break;
     }
   });
+  function buildOk(b, i, got) {
+    var st = BS[b.id + ':' + i];
+    $('bo-' + b.id + '-' + i).className = 'build-out ok'; var fb = $('bf-' + b.id + '-' + i); fb.className = 'fb good'; fb.textContent = '✓ Правильно!';
+    S.vals[b.id + ':' + i] = got; save(); st.ok = true;
+    if (b.items.every(function (_, k) { return BS[b.id + ':' + k].ok; })) markDone(b.id);
+  }
   function buildCheck(b, i) {
     var st = BS[b.id + ':' + i], fb = $('bf-' + b.id + '-' + i), bo = $('bo-' + b.id + '-' + i);
     if (st.out.length < st.words.length) { fb.className = 'fb bad'; fb.textContent = 'Використай усі слова.'; return; }
-    var got = st.out.map(function (k) { return st.words[k]; }).join(' ') + st.end, want = b.items[i];
-    if (got === want) { bo.className = 'build-out ok'; fb.className = 'fb good'; fb.textContent = '✓ Правильно!'; S.vals[b.id + ':' + i] = got; save(); st.ok = true;
-      if (b.items.every(function (_, k) { return BS[b.id + ':' + k].ok; })) markDone(b.id); }
-    else { bo.className = 'build-out bad'; fb.className = 'fb bad'; fb.innerHTML = '✗ Ще не те. ' + (b.hint || 'Перевір порядок: підмет → дієслово → додатки → період.') + '<br><span class="small">Правильно: <i>' + esc(want) + '</i></span>'; }
+    var got = st.out.map(function (k) { return st.words[k]; }).join(' ') + st.end;
+    var it = b.items[i], variants = Array.isArray(it) ? it : [it];
+    if (variants.indexOf(got) >= 0) { buildOk(b, i, got); }
+    else {
+      bo.className = 'build-out bad'; fb.className = 'fb bad';
+      fb.innerHTML = 'Це не збігається з нашими моделями. Але в англійській часто є кілька природних порядків слів: якщо твоє речення звучить правильно, можеш його зарахувати.<br><span class="small">Наша модель: <i>' + esc(variants[0]) + '</i></span><br>' +
+        '<button class="btn btn-ghost" data-act="b-accept" data-b="' + b.id + '" data-i="' + i + '">Мій варіант теж правильний</button>';
+    }
   }
+  function fwCount(t) {
+    var id = t.dataset.fw, bid = id.split(':')[0], key = id.split(':')[1];
+    $('fwc-' + bid + '-' + key).textContent = words(t.value) + ' слів';
+    var total = fwTotal(bid);
+    var el = $('ftot-' + bid), bl = BYID[bid], min = bl.minWords || 150;
+    el.textContent = 'Разом: ' + total + ' слів' + (total >= min ? ' ✓' : ' (мінімум ' + min + (bl.target ? ', ціль ' + bl.target : '') + ')');
+    el.className = 'fw-total' + (total >= min ? ' ok' : '');
+    return total;
+  }
+  function fwTotal(bid) { var total = 0; document.querySelectorAll('textarea[data-fw^="' + bid + ':"]').forEach(function (x) { if (!x.dataset.nc) total += words(x.value); }); return total; }
+  function fwModel(b) {
+    var fb = $('fb-' + b.id), need = b.showAfter || 100;
+    if (fwTotal(b.id) < need) { fb.className = 'fb bad'; fb.textContent = 'Спершу напиши відповідь (хоча б ' + need + ' слів), тоді порівнюй з моделлю.'; return; }
+    fb.textContent = ''; $('m-' + b.id).style.display = 'block'; markDone(b.id);
+  }
+  function tFmt(n) { var m = Math.floor(n / 60), s2 = n % 60; return m + ':' + (s2 < 10 ? '0' : '') + s2; }
+  function tStart(b) { var t = TM[b.id] = TM[b.id] || { left: (b.minutes || 20) * 60 }; if (t.h) return; t.h = setInterval(function () { t.left--; $('tm-' + b.id).textContent = tFmt(Math.max(t.left, 0)); if (t.left <= 0) { clearInterval(t.h); t.h = null; flash('Час вийшов! Закінчуй речення і перевір відповідь.'); } }, 1000); }
+  function tPause(b) { var t = TM[b.id]; if (t && t.h) { clearInterval(t.h); t.h = null; } }
+  function tReset(b) { tPause(b); TM[b.id] = { left: (b.minutes || 20) * 60 }; $('tm-' + b.id).textContent = tFmt(TM[b.id].left); }
   document.addEventListener('input', function (e) {
     var t = e.target;
+    if (t.dataset.fw) { S.vals[t.dataset.fw] = t.value; save(); fwCount(t); }
     if (t.dataset.gap) { S.vals[t.dataset.gap] = t.value; save(); }
     if (t.dataset.ta) { S.vals[t.dataset.ta] = t.value; save(); $('wc-' + t.dataset.ta).textContent = words(t.value) + ' слів'; }
   });
@@ -265,6 +327,7 @@
       r.blocks.forEach(function (b) {
         if (b.type === 'gap') { var l = []; b.items.forEach(function (it, i) { var v = S.vals[b.id + ':' + i]; if (v) l.push((i + 1) + '. ' + it.pre.replace(/<[^>]+>/g, '') + '[' + v + ']' + it.post.replace(/<[^>]+>/g, '')); }); if (l.length) part.push((b.title || 'Gap-fill') + ':\n' + l.join('\n')); }
         if ((b.type === 'rewrite' || b.type === 'write') && S.vals[b.id]) part.push((b.title || b.tag || 'Текст') + ':\n' + S.vals[b.id]);
+        if (b.type === 'fullwrite') { var fl = [], tot = 0; b.parts.forEach(function (p2) { var v2 = S.vals[b.id + ':' + p2.key]; if (v2) { fl.push(p2.label + ':\n' + v2); if (!p2.nocount) tot += words(v2); } }); if (fl.length) part.push((b.title || 'Повна відповідь') + ' (' + tot + ' слів):\n' + fl.join('\n\n')); }
         if (b.type === 'build') { var l2 = []; b.items.forEach(function (_, i) { if (S.vals[b.id + ':' + i]) l2.push((i + 1) + '. ' + S.vals[b.id + ':' + i]); }); if (l2.length) part.push((b.title || 'Збери речення') + ':\n' + l2.join('\n')); }
       });
       if (part.length) { out.push('=== ' + r.label + ' · ' + G[r.graph].name + ' ==='); out.push(part.join('\n\n')); out.push(''); }

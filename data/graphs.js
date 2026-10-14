@@ -40,4 +40,29 @@ window.GRAPHS = {
       {name:'Sweden', color:'#C94F7C', values:[15,17,19,24,26,28,29,30,31]}
     ]
   }
+  ,
+  re: {
+    name: 'Renewable electricity',
+    title: 'Electricity Generated from Renewable Sources in Three Countries, 2000–2025',
+    svgTitle: 'Electricity from renewable sources, 2000–2025',
+    yLabel: 'Share of electricity (%)',
+    x: ['2000','2005','2010','2015','2020','2025'],
+    yMax: 50, step: 10,
+    series: [
+      {name:'Germany',        color:'#2E5A88', values:[6,10,17,30,42,47]},
+      {name:'United Kingdom', color:'#E8890C', values:[3,5,7,22,40,45]},
+      {name:'Poland',         color:'#4A7C59', values:[2,3,7,13,16,19]}
+    ]
+  },
+  rm: {
+    name: 'Railway Museum',
+    title: 'Number of Visitors to a Railway Museum, 2010–2023',
+    svgTitle: 'Visitors to a railway museum, 2010–2023',
+    yLabel: 'Visitors (thousands)',
+    x: ['2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023'],
+    yMax: 700, step: 100,
+    series: [
+      {name:'Visitors', color:'#1F6A80', values:[320,335,310,350,420,480,465,520,580,610,150,230,480,590]}
+    ]
+  }
 };

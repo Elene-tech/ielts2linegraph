@@ -26,31 +26,36 @@
 
   <div class="card">
     <h2>2. Як вставляти в Kwiga</h2>
-    <p>У кожному уроці додай блок «HTML-код» (або iframe) і встав код з урока нижче. Скрипт у коді підганяє висоту, тому подвійного скролу не буде. Якщо Kwiga вирізає скрипт, видали його, а в iframe лиши <code>height="1200"</code>.</p>
+    <p>У кожному уроці Kwiga додай блок «HTML-код» (або iframe) і встав код нижче. Окремий урок «Словник» — остання картка. У кожному уроці також є кнопка 📚 зі словником, тож учень не виходить із вправи.</p>
   </div>
 
   <div id="list"></div>
 </div>
 <script>
 var LESSONS = [
-  {id:'03', file:'lessons/03-introduction.html', title:'Practice · Introduction', status:'ready'},
-  {id:'04', file:'lessons/04-overview.html',     title:'Practice · Overview',     status:'ready'},
-  {id:'05', file:'lessons/05-body-1.html',       title:'Practice · Main body 1',  status:'soon'},
-  {id:'06', file:'lessons/06-body-2.html',       title:'Practice · Main body 2',  status:'soon'}
+  {id:'03', file:'lessons/03-introduction.html',      title:'Practice · Introduction',        status:'ready'},
+  {id:'04', file:'lessons/04-overview.html',          title:'Practice · Overview',            status:'ready'},
+  {id:'05', file:'lessons/05-find-information.html',  title:'Practice · Як шукати інформацію', status:'ready'},
+  {id:'06', file:'lessons/06-body-1.html',            title:'Practice · Main Body 1',         status:'ready'},
+  {id:'07', file:'lessons/07-body-2.html',            title:'Practice · Main Body 2',         status:'ready'},
+  {id:'08', file:'lessons/08-full-response.html',     title:'Final Task · Повна відповідь',   status:'ready'},
+  {id:'09', file:'lessons/vocabulary.html',           title:'Словник модуля (окрема сторінка)', status:'ready'}
 ];
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 function render(){
   var base=document.getElementById('base').value.replace(/\/+$/,'');
   document.getElementById('list').innerHTML = LESSONS.map(function(l){
     var url=base+'/'+l.file, fid='ielts-'+l.id;
-    var code='<iframe id="'+fid+'" src="'+url+'" width="100%" height="1200" style="border:0;border-radius:12px;" loading="lazy"></iframe>\n'+
+    var A='<iframe src="'+url+'" width="100%" height="850" style="border:0;border-radius:12px;" loading="lazy"></iframe>';
+    var B='<iframe id="'+fid+'" src="'+url+'" width="100%" height="1200" style="border:0;border-radius:12px;" loading="lazy"></iframe>\n'+
       '<script>window.addEventListener("message",function(e){var f=document.getElementById("'+fid+'");if(f&&e.source===f.contentWindow&&e.data&&e.data.type==="ielts-resize"){f.style.height=e.data.height+"px";}});<\/script>';
-    return '<div class="card"><span class="st '+l.status+'">'+(l.status==='ready'?'готово':'скоро')+'</span><h2 style="margin-top:8px">'+l.title+'</h2>'+
-      '<p class="small">'+url+'</p>'+
-      (l.status==='ready'?'<div class="code" id="c'+l.id+'">'+esc(code)+'</div><button class="btn btn-primary" onclick="copyCode(\''+l.id+'\')">Скопіювати код</button><a class="btn btn-ghost" style="text-decoration:none" target="_blank" href="'+l.file+'">Відкрити урок</a>':'<p class="small">Файл з’явиться в наступному оновленні.</p>')+'</div>';
+    return '<div class="card"><span class="st ready">готово</span><h2 style="margin-top:8px">'+l.title+'</h2><p class="small">'+url+'</p>'+
+      '<p><b>Варіант A (рекомендовано):</b> фіксована висота, прокрутка всередині. Кнопки «Словник» і «Мої відповіді» завжди перед очима.</p><div class="code" id="a'+l.id+'">'+esc(A)+'</div><button class="btn btn-primary" onclick="copyCode(\'a'+l.id+'\')">Скопіювати код A</button>'+
+      (l.file.indexOf('vocabulary')<0?'<details class="d" style="margin-top:10px"><summary>Варіант B: на всю висоту (без внутрішньої прокрутки)</summary><p class="small" style="margin:6px 0">Потрібен дозвіл Kwiga на скрипт у HTML-блоці. На дуже довгій сторінці кнопки угорі можуть бути далеко від екрана.</p><div class="code" id="b'+l.id+'">'+esc(B)+'</div><button class="btn btn-ghost" onclick="copyCode(\'b'+l.id+'\')">Скопіювати код B</button></details>':'')+
+      ' <a class="btn btn-ghost" style="text-decoration:none" target="_blank" href="'+l.file+'">Відкрити урок</a></div>';
   }).join('');
 }
-function copyCode(id){var t=document.getElementById('c'+id).textContent;
+function copyCode(id){var t=document.getElementById(id).textContent;
   if(navigator.clipboard)navigator.clipboard.writeText(t);else{var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}
   alert('Скопійовано. Встав у блок HTML-коду в Kwiga.');}
 render();

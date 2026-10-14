@@ -1,6 +1,7 @@
 window.LESSON = {
   id: 'lg-04-overview',
   title: 'Practice · Overview',
+  vocab: ['overview', 'trend-verbs', 'crossing', 'forecast'],
   subtitle: 'Line Graphs · знаходимо дві головні історії графіка й записуємо їх 1–2 реченнями без цифр.',
 
   intro: [
@@ -20,6 +21,7 @@ window.LESSON = {
   rounds: [
   /* ===================== РАУНД 1 ===================== */
   { label: 'Раунд 1', sub: 'з підказками', graph: 'uk',
+    words: [['Overall,','Загалом,'],['while / whereas','тоді як'],['overtook','випередив'],['the main source','основне джерело']],
     lead: 'Дві лінії, один перетин: найпростіший графік для відпрацювання формули.',
     blocks: [
       { type: 'example', tag: 'Крок 1 · Приклад', tagc: 'green', title: 'Розбираємо зразок Band 7', segments: [
@@ -66,13 +68,14 @@ window.LESSON = {
         check: ['Є Overall або схожа фраза', 'Дієслова точніші, ніж went up / went down', 'Є сполучник контрасту', 'Немає цифр'] },
 
       { type: 'build', tag: 'Крок 6 · Збери речення', tagc: 'green', title: 'Склади Overview зі слів', items: [
-          'Overall, the share of fossil fuels fell steadily, while that of renewables increased.',
-          'The most striking feature is that renewables overtook fossil fuels around 2018.',
+          ['Overall, the share of fossil fuels fell steadily, while that of renewables increased.', 'Overall, the share of fossil fuels steadily fell, while that of renewables increased.'],
+          ['The most striking feature is that renewables overtook fossil fuels around 2018.', 'The most striking feature is that around 2018 renewables overtook fossil fuels.'],
           'By 2025, renewable sources had become the main source of electricity.'] }
     ] },
 
   /* ===================== РАУНД 2 ===================== */
   { label: 'Раунд 2', sub: 'менше підказок', graph: 'de',
+    words: [['the only … to decline','єдиний, що знизився'],['overtook … as the most used','випередив і став найпоширенішим'],['remained the least','залишався найменшим'],['In contrast,','Навпаки,']],
     lead: 'Чотири лінії: головне — не потонути в деталях і знайти виняток.',
     blocks: [
       { type: 'pick', tag: 'Крок 1 · Знайди дві історії', tagc: 'purple', title: 'Що має увійти в Overview?', need: 2, opts: [
@@ -119,6 +122,7 @@ window.LESSON = {
 
   /* ===================== РАУНД 3 ===================== */
   { label: 'Раунд 3', sub: 'майже самостійно', graph: 'el',
+    words: [['is projected to','за прогнозом'],['remains the highest','залишається найвищою'],['are expected to converge','мають зблизитися'],['It is clear that','Очевидно, що']],
     lead: 'Прогноз змінює мову: замість will використовуємо is projected to / is expected to.',
     blocks: [
       { type: 'write', tag: 'Крок 1 · Напиши сам(а)', tagc: 'blue', title: 'Напиши Overview (2 речення)',
@@ -143,7 +147,7 @@ window.LESSON = {
 
       { type: 'build', tag: 'Крок 3 · Збери речення', tagc: 'green', title: 'Склади Overview зі слів', items: [
           'Overall, the proportion of people aged 65 and over rises in all three countries.',
-          'Japan remains the highest, while the USA and Sweden are projected to become similar.'] }
+          ['Japan remains the highest, while the USA and Sweden are projected to become similar.', 'Japan remains the highest, while Sweden and the USA are projected to become similar.']] }
     ] }
   ],
 

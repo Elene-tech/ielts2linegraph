@@ -1,6 +1,7 @@
 window.LESSON = {
   id: 'lg-03-introduction',
   title: 'Practice · Introduction',
+  vocab: ['intro', 'traps'],
   subtitle: 'Line Graphs · тренуємо перше речення відповіді на трьох графіках: від розбору прикладу до самостійного написання.',
 
   intro: [
@@ -19,6 +20,7 @@ window.LESSON = {
   rounds: [
   /* ===================== РАУНД 1 ===================== */
   { label: 'Раунд 1', sub: 'з підказками', graph: 'uk',
+    words: [['illustrates / shows / presents','показує'],['the proportion / share of','частка'],['generated / produced from','вироблена з'],['between … and …','між … і …']],
     lead: 'Повна підтримка: приклад, банк слів, пояснення до кожної відповіді.',
     blocks: [
       { type: 'example', tag: 'Крок 1 · Приклад', tagc: 'green', title: 'Розбираємо зразок Band 7', segments: [
@@ -65,14 +67,15 @@ window.LESSON = {
         check: ['Я змінив(ла) дієслово', 'Я замінив(ла) принаймні одне слово синонімом', 'Є і тема, і період', 'У моєму реченні немає цифр і висновків'] },
 
       { type: 'build', tag: 'Крок 5 · Збери речення', tagc: 'green', title: 'Склади Introduction зі слів', items: [
-          'The line graph shows the proportion of UK electricity produced from two sources between 2000 and 2025.',
-          'The graph compares the share of electricity generated from fossil fuels and renewables in the UK.',
-          'The line graph illustrates how the electricity mix in the UK changed over a 25-year period.'],
+          ['The line graph shows the proportion of UK electricity produced from two sources between 2000 and 2025.', 'The line graph shows the proportion of UK electricity produced between 2000 and 2025 from two sources.'],
+          ['The graph compares the share of electricity generated from fossil fuels and renewables in the UK.', 'The graph compares the share of electricity generated from renewables and fossil fuels in the UK.', 'The graph compares the share of electricity generated in the UK from fossil fuels and renewables.', 'The graph compares the share of electricity generated in the UK from renewables and fossil fuels.'],
+          ['The line graph illustrates how the electricity mix in the UK changed over a 25-year period.', 'The line graph illustrates how the electricity mix changed in the UK over a 25-year period.']],
         hint: 'Починай з <b>The line graph</b>, потім дієслово, потім тема, у кінці період.' }
     ] },
 
   /* ===================== РАУНД 2 ===================== */
   { label: 'Раунд 2', sub: 'менше підказок', graph: 'de',
+    words: [['consumption','споживання'],['four types of fuel','чотири види палива'],['measured in','вимірюється в'],['a thirty-year period','тридцятирічний період']],
     lead: 'Тепер без прикладу й банку слів. Спочатку подумай сам(а), потім звіряйся з поясненнями.',
     blocks: [
       { type: 'choose', tag: 'Крок 1 · Обери правильне', tagc: 'purple', title: 'Який варіант найкращий?', qs: [
@@ -108,11 +111,12 @@ window.LESSON = {
 
       { type: 'build', tag: 'Крок 4 · Збери речення', tagc: 'green', title: 'Склади Introduction зі слів', items: [
           'The line graph compares German consumption of four types of fuel between 1985 and 2015.',
-          'The graph shows how much energy Germany consumed from four fuels over thirty years.'] }
+          ['The graph shows how much energy Germany consumed from four fuels over thirty years.', 'The graph shows how much energy Germany consumed over thirty years from four fuels.']] }
     ] },
 
   /* ===================== РАУНД 3 ===================== */
   { label: 'Раунд 3', sub: 'майже самостійно', graph: 'el',
+    words: [['people aged 65 and over','люди віком 65+'],['projections','прогнози'],['with figures given from … to …','з даними від … до …'],['the percentage of','відсоток']],
     lead: 'Графік із прогнозом (пунктир після 2020). Спочатку пишеш сам(а), потім порівнюєш.',
     blocks: [
       { type: 'write', tag: 'Крок 1 · Напиши сам(а)', tagc: 'blue', title: 'Напиши Introduction',
@@ -136,7 +140,7 @@ window.LESSON = {
         ] },
 
       { type: 'build', tag: 'Крок 3 · Збери речення', tagc: 'green', title: 'Склади Introduction зі слів', items: [
-          'The line graph compares the proportion of people aged 65 and over in three countries between 2000 and 2040.',
+          ['The line graph compares the proportion of people aged 65 and over in three countries between 2000 and 2040.', 'The line graph compares the proportion of people aged 65 and over between 2000 and 2040 in three countries.'],
           'The figures from 2025 onwards are projections rather than actual data.'] }
     ] }
   ],
