@@ -238,7 +238,7 @@
       if (chosen) { el.classList.add(o[1] ? 'ok' : 'bad'); if (o[1]) good++; else bad++; el.dataset.chk = '1'; }
     });
     var fb = $('fb-' + b.id);
-    if (good === b.need && bad === 0) { fb.className = 'fb good'; fb.textContent = 'Правильно! Це і є дві історії Overview.'; markDone(b.id); b.opts.forEach(function (o, i) { var el = $('po-' + b.id + '-' + i); el.classList.add('locked'); }); }
+    if (good === b.need && bad === 0) { fb.className = 'fb good'; fb.textContent = b.need === 2 ? 'Правильно! Це і є дві історії Overview.' : 'Правильно! Саме ці пункти й треба взяти в абзац.'; markDone(b.id); b.opts.forEach(function (o, i) { var el = $('po-' + b.id + '-' + i); el.classList.add('locked'); }); }
     else { fb.className = 'fb bad'; fb.textContent = 'Правильних: ' + good + ' з ' + b.need + (bad ? ', зайвих: ' + bad : '') + '. Прочитай пояснення, зніми зайве і спробуй ще раз.'; }
   }
   function compare(b) {
